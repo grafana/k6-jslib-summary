@@ -4,42 +4,47 @@ var replacements = {
   '>': '&gt;',
   "'": '&#39;',
   '"': '&quot;',
-}
+};
 
 function escapeHTML(str) {
   // TODO: something more robust?
   return str.replace(/[&<>'"]/g, function (char) {
-    return replacements[char]
-  })
+    return replacements[char];
+  });
 }
 
 function generateJUnitXML(data, options) {
-  var failures = 0
-  var cases = []
+  var failures = 0;
+  var cases = [];
 
   forEach(data.metrics, function (metricName, metric) {
     if (!metric.thresholds) {
-      return
+      return;
     }
     forEach(metric.thresholds, function (thresholdName, threshold) {
       if (threshold.ok) {
-        cases.push(
-          '<testcase name="' + escapeHTML(metricName) + ' - ' + escapeHTML(thresholdName) + '" />'
-        )
-      } else {
-        failures++
         cases.push(
           '<testcase name="' +
             escapeHTML(metricName) +
             ' - ' +
             escapeHTML(thresholdName) +
-            '"><failure message="failed" /></testcase>'
-        )
+            '" />',
+        );
+      } else {
+        failures++;
+        cases.push(
+          '<testcase name="' +
+            escapeHTML(metricName) +
+            ' - ' +
+            escapeHTML(thresholdName) +
+            '"><failure message="failed" /></testcase>',
+        );
       }
-    })
-  })
+    });
+  });
 
-  var name = options && options.name ? escapeHTML(options.name) : 'k6 thresholds'
+  var name =
+    options && options.name ? escapeHTML(options.name) : 'k6 thresholds';
 
   return (
     '<?xml version="1.0"?>\n<testsuites tests="' +
@@ -56,7 +61,7 @@ function generateJUnitXML(data, options) {
     '">' +
     cases.join('\n') +
     '\n</testsuite >\n</testsuites >'
-  )
+  );
 }
 
-exports.jUnit = generateJUnitXML
+exports.jUnit = generateJUnitXML;

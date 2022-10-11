@@ -2,11 +2,11 @@ var forEach = function (obj, callback) {
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (callback(key, obj[key])) {
-        break
+        break;
       }
     }
   }
-}
+};
 
 var palette = {
   bold: 1,
@@ -15,205 +15,222 @@ var palette = {
   green: 32,
   cyan: 36,
   //TODO: add others?
-}
+};
 
-var groupPrefix = '█'
-var detailsPrefix = '↳'
-var succMark = '✓'
-var failMark = '✗'
+var groupPrefix = '█';
+var detailsPrefix = '↳';
+var succMark = '✓';
+var failMark = '✗';
 var defaultOptions = {
   indent: ' ',
   enableColors: true,
   summaryTimeUnit: null,
   summaryTrendStats: null,
-}
+};
 
 // strWidth tries to return the actual width the string will take up on the
 // screen, without any terminal formatting, unicode ligatures, etc.
 function strWidth(s) {
   // TODO: determine if NFC or NFKD are not more appropriate? or just give up? https://hsivonen.fi/string-length/
-  var data = s.normalize('NFKC') // This used to be NFKD in Go, but this should be better
-  var inEscSeq = false
-  var inLongEscSeq = false
-  var width = 0
+  var data = s.normalize('NFKC'); // This used to be NFKD in Go, but this should be better
+  var inEscSeq = false;
+  var inLongEscSeq = false;
+  var width = 0;
   for (var char of data) {
     if (char.done) {
-      break
+      break;
     }
 
     // Skip over ANSI escape codes.
     if (char == '\x1b') {
-      inEscSeq = true
-      continue
+      inEscSeq = true;
+      continue;
     }
     if (inEscSeq && char == '[') {
-      inLongEscSeq = true
-      continue
+      inLongEscSeq = true;
+      continue;
     }
-    if (inEscSeq && inLongEscSeq && char.charCodeAt(0) >= 0x40 && char.charCodeAt(0) <= 0x7e) {
-      inEscSeq = false
-      inLongEscSeq = false
-      continue
+    if (
+      inEscSeq &&
+      inLongEscSeq &&
+      char.charCodeAt(0) >= 0x40 &&
+      char.charCodeAt(0) <= 0x7e
+    ) {
+      inEscSeq = false;
+      inLongEscSeq = false;
+      continue;
     }
-    if (inEscSeq && !inLongEscSeq && char.charCodeAt(0) >= 0x40 && char.charCodeAt(0) <= 0x5f) {
-      inEscSeq = false
-      continue
+    if (
+      inEscSeq &&
+      !inLongEscSeq &&
+      char.charCodeAt(0) >= 0x40 &&
+      char.charCodeAt(0) <= 0x5f
+    ) {
+      inEscSeq = false;
+      continue;
     }
 
     if (!inEscSeq && !inLongEscSeq) {
-      width++
+      width++;
     }
   }
-  return width
+  return width;
 }
 
 function summarizeCheck(indent, check, decorate) {
   if (check.fails == 0) {
-    return decorate(indent + succMark + ' ' + check.name, palette.green)
+    return decorate(indent + succMark + ' ' + check.name, palette.green);
   }
 
-  var succPercent = Math.floor((100 * check.passes) / (check.passes + check.fails))
+  var succPercent = Math.floor(
+    (100 * check.passes) / (check.passes + check.fails),
+  );
   return decorate(
     indent +
-    failMark +
-    ' ' +
-    check.name +
-    '\n' +
-    indent +
-    ' ' +
-    detailsPrefix +
-    '  ' +
-    succPercent +
-    '% — ' +
-    succMark +
-    ' ' +
-    check.passes +
-    ' / ' +
-    failMark +
-    ' ' +
-    check.fails,
-    palette.red
-  )
+      failMark +
+      ' ' +
+      check.name +
+      '\n' +
+      indent +
+      ' ' +
+      detailsPrefix +
+      '  ' +
+      succPercent +
+      '% — ' +
+      succMark +
+      ' ' +
+      check.passes +
+      ' / ' +
+      failMark +
+      ' ' +
+      check.fails,
+    palette.red,
+  );
 }
 
 function summarizeGroup(indent, group, decorate) {
-  var result = []
+  var result = [];
   if (group.name != '') {
-    result.push(indent + groupPrefix + ' ' + group.name + '\n')
-    indent = indent + '  '
+    result.push(indent + groupPrefix + ' ' + group.name + '\n');
+    indent = indent + '  ';
   }
 
   for (var i = 0; i < group.checks.length; i++) {
-    result.push(summarizeCheck(indent, group.checks[i], decorate))
+    result.push(summarizeCheck(indent, group.checks[i], decorate));
   }
   if (group.checks.length > 0) {
-    result.push('')
+    result.push('');
   }
   for (var i = 0; i < group.groups.length; i++) {
-    Array.prototype.push.apply(result, summarizeGroup(indent, group.groups[i], decorate))
+    Array.prototype.push.apply(
+      result,
+      summarizeGroup(indent, group.groups[i], decorate),
+    );
   }
 
-  return result
+  return result;
 }
 
 function displayNameForMetric(name) {
-  var subMetricPos = name.indexOf('{')
+  var subMetricPos = name.indexOf('{');
   if (subMetricPos >= 0) {
-    return '{ ' + name.substring(subMetricPos + 1, name.length - 1) + ' }'
+    return '{ ' + name.substring(subMetricPos + 1, name.length - 1) + ' }';
   }
-  return name
+  return name;
 }
 
 function indentForMetric(name) {
   if (name.indexOf('{') >= 0) {
-    return '  '
+    return '  ';
   }
-  return ''
+  return '';
 }
 
 function humanizeBytes(bytes) {
-  var units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  var base = 1000
+  var units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  var base = 1000;
   if (bytes < 10) {
-    return bytes + ' B'
+    return bytes + ' B';
   }
 
-  var e = Math.floor(Math.log(bytes) / Math.log(base))
-  var suffix = units[e | 0]
-  var val = Math.floor((bytes / Math.pow(base, e)) * 10 + 0.5) / 10
-  return val.toFixed(val < 10 ? 1 : 0) + ' ' + suffix
+  var e = Math.floor(Math.log(bytes) / Math.log(base));
+  var suffix = units[e | 0];
+  var val = Math.floor((bytes / Math.pow(base, e)) * 10 + 0.5) / 10;
+  return val.toFixed(val < 10 ? 1 : 0) + ' ' + suffix;
 }
 
 var unitMap = {
   s: { unit: 's', coef: 0.001 },
   ms: { unit: 'ms', coef: 1 },
   us: { unit: 'µs', coef: 1000 },
-}
+};
 
 function toFixedNoTrailingZeros(val, prec) {
   // TODO: figure out something better?
-  return parseFloat(val.toFixed(prec)).toString()
+  return parseFloat(val.toFixed(prec)).toString();
 }
 
 function toFixedNoTrailingZerosTrunc(val, prec) {
-  var mult = Math.pow(10, prec)
-  return toFixedNoTrailingZeros(Math.trunc(mult * val) / mult, prec)
+  var mult = Math.pow(10, prec);
+  return toFixedNoTrailingZeros(Math.trunc(mult * val) / mult, prec);
 }
 
 function humanizeGenericDuration(dur) {
   if (dur === 0) {
-    return '0s'
+    return '0s';
   }
 
   if (dur < 0.001) {
     // smaller than a microsecond, print nanoseconds
-    return Math.trunc(dur * 1000000) + 'ns'
+    return Math.trunc(dur * 1000000) + 'ns';
   }
   if (dur < 1) {
     // smaller than a millisecond, print microseconds
-    return toFixedNoTrailingZerosTrunc(dur * 1000, 2) + 'µs'
+    return toFixedNoTrailingZerosTrunc(dur * 1000, 2) + 'µs';
   }
   if (dur < 1000) {
     // duration is smaller than a second
-    return toFixedNoTrailingZerosTrunc(dur, 2) + 'ms'
+    return toFixedNoTrailingZerosTrunc(dur, 2) + 'ms';
   }
 
-  var result = toFixedNoTrailingZerosTrunc((dur % 60000) / 1000, dur > 60000 ? 0 : 2) + 's'
-  var rem = Math.trunc(dur / 60000)
+  var result =
+    toFixedNoTrailingZerosTrunc((dur % 60000) / 1000, dur > 60000 ? 0 : 2) +
+    's';
+  var rem = Math.trunc(dur / 60000);
   if (rem < 1) {
     // less than a minute
-    return result
+    return result;
   }
-  result = (rem % 60) + 'm' + result
-  rem = Math.trunc(rem / 60)
+  result = (rem % 60) + 'm' + result;
+  rem = Math.trunc(rem / 60);
   if (rem < 1) {
     // less than an hour
-    return result
+    return result;
   }
-  return rem + 'h' + result
+  return rem + 'h' + result;
 }
 
 function humanizeDuration(dur, timeUnit) {
   if (timeUnit !== '' && unitMap.hasOwnProperty(timeUnit)) {
-    return (dur * unitMap[timeUnit].coef).toFixed(2) + unitMap[timeUnit].unit
+    return (dur * unitMap[timeUnit].coef).toFixed(2) + unitMap[timeUnit].unit;
   }
 
-  return humanizeGenericDuration(dur)
+  return humanizeGenericDuration(dur);
 }
 
 function humanizeValue(val, metric, timeUnit) {
   if (metric.type == 'rate') {
     // Truncate instead of round when decreasing precision to 2 decimal places
-    return (Math.trunc(val * 100 * 100) / 100).toFixed(2) + '%'
+    return (Math.trunc(val * 100 * 100) / 100).toFixed(2) + '%';
   }
 
   switch (metric.contains) {
     case 'data':
-      return humanizeBytes(val)
+      return humanizeBytes(val);
     case 'time':
-      return humanizeDuration(val, timeUnit)
+      return humanizeDuration(val, timeUnit);
     default:
-      return toFixedNoTrailingZeros(val, 6)
+      return toFixedNoTrailingZeros(val, 6);
   }
 }
 
@@ -223,192 +240,207 @@ function nonTrendMetricValueForSum(metric, timeUnit) {
       return [
         humanizeValue(metric.values.count, metric, timeUnit),
         humanizeValue(metric.values.rate, metric, timeUnit) + '/s',
-      ]
+      ];
     case 'gauge':
       return [
         humanizeValue(metric.values.value, metric, timeUnit),
         'min=' + humanizeValue(metric.values.min, metric, timeUnit),
         'max=' + humanizeValue(metric.values.max, metric, timeUnit),
-      ]
+      ];
     case 'rate':
       return [
         humanizeValue(metric.values.rate, metric, timeUnit),
         succMark + ' ' + metric.values.passes,
         failMark + ' ' + metric.values.fails,
-      ]
+      ];
     default:
-      return ['[no data]']
+      return ['[no data]'];
   }
 }
 
 function summarizeMetrics(options, data, decorate) {
-  var indent = options.indent + '  '
-  var result = []
+  var indent = options.indent + '  ';
+  var result = [];
 
-  var names = []
-  var nameLenMax = 0
+  var names = [];
+  var nameLenMax = 0;
 
-  var nonTrendValues = {}
-  var nonTrendValueMaxLen = 0
-  var nonTrendExtras = {}
-  var nonTrendExtraMaxLens = [0, 0]
+  var nonTrendValues = {};
+  var nonTrendValueMaxLen = 0;
+  var nonTrendExtras = {};
+  var nonTrendExtraMaxLens = [0, 0];
 
-  var trendCols = {}
-  var numTrendColumns = options.summaryTrendStats.length
-  var trendColMaxLens = new Array(numTrendColumns).fill(0)
+  var trendCols = {};
+  var numTrendColumns = options.summaryTrendStats.length;
+  var trendColMaxLens = new Array(numTrendColumns).fill(0);
   forEach(data.metrics, function (name, metric) {
-    names.push(name)
+    names.push(name);
     // When calculating widths for metrics, account for the indentation on submetrics.
-    var displayName = indentForMetric(name) + displayNameForMetric(name)
-    var displayNameWidth = strWidth(displayName)
+    var displayName = indentForMetric(name) + displayNameForMetric(name);
+    var displayNameWidth = strWidth(displayName);
     if (displayNameWidth > nameLenMax) {
-      nameLenMax = displayNameWidth
+      nameLenMax = displayNameWidth;
     }
 
     if (metric.type == 'trend') {
-      var cols = []
+      var cols = [];
       for (var i = 0; i < numTrendColumns; i++) {
-        var tc = options.summaryTrendStats[i]
-        var value = metric.values[tc]
+        var tc = options.summaryTrendStats[i];
+        var value = metric.values[tc];
         if (tc === 'count') {
-          value = value.toString()
+          value = value.toString();
         } else {
-          value = humanizeValue(value, metric, options.summaryTimeUnit)
+          value = humanizeValue(value, metric, options.summaryTimeUnit);
         }
-        var valLen = strWidth(value)
+        var valLen = strWidth(value);
         if (valLen > trendColMaxLens[i]) {
-          trendColMaxLens[i] = valLen
+          trendColMaxLens[i] = valLen;
         }
-        cols[i] = value
+        cols[i] = value;
       }
-      trendCols[name] = cols
-      return
+      trendCols[name] = cols;
+      return;
     }
-    var values = nonTrendMetricValueForSum(metric, options.summaryTimeUnit)
-    nonTrendValues[name] = values[0]
-    var valueLen = strWidth(values[0])
+    var values = nonTrendMetricValueForSum(metric, options.summaryTimeUnit);
+    nonTrendValues[name] = values[0];
+    var valueLen = strWidth(values[0]);
     if (valueLen > nonTrendValueMaxLen) {
-      nonTrendValueMaxLen = valueLen
+      nonTrendValueMaxLen = valueLen;
     }
-    nonTrendExtras[name] = values.slice(1)
+    nonTrendExtras[name] = values.slice(1);
     for (var i = 1; i < values.length; i++) {
-      var extraLen = strWidth(values[i])
+      var extraLen = strWidth(values[i]);
       if (extraLen > nonTrendExtraMaxLens[i - 1]) {
-        nonTrendExtraMaxLens[i - 1] = extraLen
+        nonTrendExtraMaxLens[i - 1] = extraLen;
       }
     }
-  })
+  });
 
   // sort all metrics but keep sub metrics grouped with their parent metrics
   names.sort(function (metric1, metric2) {
-    var parent1 = metric1.split('{', 1)[0]
-    var parent2 = metric2.split('{', 1)[0]
-    var result = parent1.localeCompare(parent2)
+    var parent1 = metric1.split('{', 1)[0];
+    var parent2 = metric2.split('{', 1)[0];
+    var result = parent1.localeCompare(parent2);
     if (result !== 0) {
-      return result
+      return result;
     }
-    var sub1 = metric1.substring(parent1.length)
-    var sub2 = metric2.substring(parent2.length)
-    return sub1.localeCompare(sub2)
-  })
+    var sub1 = metric1.substring(parent1.length);
+    var sub2 = metric2.substring(parent2.length);
+    return sub1.localeCompare(sub2);
+  });
 
   var getData = function (name) {
     if (trendCols.hasOwnProperty(name)) {
-      var cols = trendCols[name]
-      var tmpCols = new Array(numTrendColumns)
+      var cols = trendCols[name];
+      var tmpCols = new Array(numTrendColumns);
       for (var i = 0; i < cols.length; i++) {
         tmpCols[i] =
           options.summaryTrendStats[i] +
           '=' +
           decorate(cols[i], palette.cyan) +
-          ' '.repeat(trendColMaxLens[i] - strWidth(cols[i]))
+          ' '.repeat(trendColMaxLens[i] - strWidth(cols[i]));
       }
-      return tmpCols.join(' ')
+      return tmpCols.join(' ');
     }
 
-    var value = nonTrendValues[name]
-    var fmtData = decorate(value, palette.cyan) + ' '.repeat(nonTrendValueMaxLen - strWidth(value))
+    var value = nonTrendValues[name];
+    var fmtData =
+      decorate(value, palette.cyan) +
+      ' '.repeat(nonTrendValueMaxLen - strWidth(value));
 
-    var extras = nonTrendExtras[name]
+    var extras = nonTrendExtras[name];
     if (extras.length == 1) {
-      fmtData = fmtData + ' ' + decorate(extras[0], palette.cyan, palette.faint)
+      fmtData =
+        fmtData + ' ' + decorate(extras[0], palette.cyan, palette.faint);
     } else if (extras.length > 1) {
-      var parts = new Array(extras.length)
+      var parts = new Array(extras.length);
       for (var i = 0; i < extras.length; i++) {
         parts[i] =
           decorate(extras[i], palette.cyan, palette.faint) +
-          ' '.repeat(nonTrendExtraMaxLens[i] - strWidth(extras[i]))
+          ' '.repeat(nonTrendExtraMaxLens[i] - strWidth(extras[i]));
       }
-      fmtData = fmtData + ' ' + parts.join(' ')
+      fmtData = fmtData + ' ' + parts.join(' ');
     }
 
-    return fmtData
-  }
+    return fmtData;
+  };
 
   for (var name of names) {
-    var metric = data.metrics[name]
-    var mark = ' '
+    var metric = data.metrics[name];
+    var mark = ' ';
     var markColor = function (text) {
-      return text
-    } // noop
+      return text;
+    }; // noop
 
     if (metric.thresholds) {
-      mark = succMark
+      mark = succMark;
       markColor = function (text) {
-        return decorate(text, palette.green)
-      }
+        return decorate(text, palette.green);
+      };
       forEach(metric.thresholds, function (name, threshold) {
         if (!threshold.ok) {
-          mark = failMark
+          mark = failMark;
           markColor = function (text) {
-            return decorate(text, palette.red)
-          }
-          return true // break
+            return decorate(text, palette.red);
+          };
+          return true; // break
         }
-      })
+      });
     }
-    var fmtIndent = indentForMetric(name)
-    var fmtName = displayNameForMetric(name)
+    var fmtIndent = indentForMetric(name);
+    var fmtName = displayNameForMetric(name);
     fmtName =
       fmtName +
       decorate(
-        '.'.repeat(nameLenMax - strWidth(fmtName) - strWidth(fmtIndent) + 3) + ':',
-        palette.faint
-      )
+        '.'.repeat(nameLenMax - strWidth(fmtName) - strWidth(fmtIndent) + 3) +
+          ':',
+        palette.faint,
+      );
 
-    result.push(indent + fmtIndent + markColor(mark) + ' ' + fmtName + ' ' + getData(name))
+    result.push(
+      indent +
+        fmtIndent +
+        markColor(mark) +
+        ' ' +
+        fmtName +
+        ' ' +
+        getData(name),
+    );
   }
 
-  return result
+  return result;
 }
 
 function generateTextSummary(data, options) {
-  var mergedOpts = Object.assign({}, defaultOptions, data.options, options)
-  var lines = []
+  var mergedOpts = Object.assign({}, defaultOptions, data.options, options);
+  var lines = [];
 
   // TODO: move all of these functions into an object with methods?
   var decorate = function (text) {
-    return text
-  }
+    return text;
+  };
   if (mergedOpts.enableColors) {
     decorate = function (text, color /*, ...rest*/) {
-      var result = '\x1b[' + color
+      var result = '\x1b[' + color;
       for (var i = 2; i < arguments.length; i++) {
-        result += ';' + arguments[i]
+        result += ';' + arguments[i];
       }
-      return result + 'm' + text + '\x1b[0m'
-    }
+      return result + 'm' + text + '\x1b[0m';
+    };
   }
 
   Array.prototype.push.apply(
     lines,
-    summarizeGroup(mergedOpts.indent + '    ', data.root_group, decorate)
-  )
+    summarizeGroup(mergedOpts.indent + '    ', data.root_group, decorate),
+  );
 
-  Array.prototype.push.apply(lines, summarizeMetrics(mergedOpts, data, decorate))
+  Array.prototype.push.apply(
+    lines,
+    summarizeMetrics(mergedOpts, data, decorate),
+  );
 
-  return lines.join('\n')
+  return lines.join('\n');
 }
 
-exports.humanizeValue = humanizeValue
-exports.textSummary = generateTextSummary
+exports.humanizeValue = humanizeValue;
+exports.textSummary = generateTextSummary;
