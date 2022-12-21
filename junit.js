@@ -6,10 +6,10 @@ var replacements = {
   '"': '&quot;',
 };
 
-const counter = "counter";
-const gauge = "gauge";
-const rate = "rate";
-const trend = "trend";
+const counterType = "counter";
+const gaugeType = "gauge";
+const rateType = "rate";
+const trendType = "trend";
 
 function escapeHTML(str) {
   // TODO: something more robust?
@@ -38,16 +38,16 @@ function generateJUnitXML(data, options) {
       } else {
         failures++;
         var failureMessage = ""
-        if (metric.type == counter) {
+        if (metric.type == counterType) {
           failureMessage = '"><failure message="failed, count: ' + metric.values.count + '"/></testcase>';
         } 
-        else if (metric.type == gauge){
+        else if (metric.type == gaugeType){
           failureMessage = '"><failure message="failed, value: ' + metric.values.value + '"/></testcase>';
         }
-        else if (metric.type == rate) {
+        else if (metric.type == rateType) {
           failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
         }
-        else if (metric.type == trend) {
+        else if (metric.type == trendType) {
           failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
         }
         else {
