@@ -6,11 +6,6 @@ var replacements = {
   '"': '&quot;',
 };
 
-const counterType = "counter";
-const gaugeType = "gauge";
-const rateType = "rate";
-const trendType = "trend";
-
 function escapeHTML(str) {
   // TODO: something more robust?
   return str.replace(/[&<>'"]/g, function (char) {
@@ -38,16 +33,16 @@ function generateJUnitXML(data, options) {
       } else {
         failures++;
         var failureMessage = ""
-        if (metric.type == counterType) {
+        if (metric.type == "counter") {
           failureMessage = '"><failure message="failed, count: ' + metric.values.count + '"/></testcase>';
-        } 
-        else if (metric.type == gaugeType){
+        }
+        else if (metric.type == "gauge"){
           failureMessage = '"><failure message="failed, value: ' + metric.values.value + '"/></testcase>';
         }
-        else if (metric.type == rateType) {
+        else if (metric.type == "rate") {
           failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
         }
-        else if (metric.type == trendType) {
+        else if (metric.type == "trend") {
           failureMessage = '"><failure message="failed, mean value: ' + metric.values.med + '"/></testcase>';
         }
         else {
