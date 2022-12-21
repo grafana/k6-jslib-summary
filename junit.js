@@ -32,12 +32,28 @@ function generateJUnitXML(data, options) {
         );
       } else {
         failures++;
+        var failureMessage = ""
+        if (metric.type == "counter") {
+          failureMessage = '"><failure message="failed, count: ' + metric.values.count + '"/></testcase>';
+        }
+        else if (metric.type == "gauge"){
+          failureMessage = '"><failure message="failed, value: ' + metric.values.value + '"/></testcase>';
+        }
+        else if (metric.type == "rate") {
+          failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
+        }
+        else if (metric.type == "trend") {
+          failureMessage = '"><failure message="failed, mean value: ' + metric.values.med + '"/></testcase>';
+        }
+        else {
+          // Default failure message for new metric types that will be included in the future.
+          failureMessage = '"><failure message="failed" /></testcase>';
+        }
         cases.push(
           '<testcase name="' +
             escapeHTML(metricName) +
             ' - ' +
-            escapeHTML(thresholdName) +
-            '"><failure message="failed" /></testcase>',
+            escapeHTML(thresholdName) + failureMessage
         );
       }
     });
