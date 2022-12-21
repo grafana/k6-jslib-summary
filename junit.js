@@ -50,6 +50,10 @@ function generateJUnitXML(data, options) {
         else if (metric.type == trend) {
           failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
         }
+        else {
+          // Default failure message for new metric types that will be included in the future.
+          failureMessage = '"><failure message="failed" /></testcase>';
+        }
         cases.push(
           '<testcase name="' +
             escapeHTML(metricName) +
