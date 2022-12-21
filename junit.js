@@ -48,7 +48,7 @@ function generateJUnitXML(data, options) {
           failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
         }
         else if (metric.type == trendType) {
-          failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
+          failureMessage = '"><failure message="failed, mean value: ' + metric.values.med + '"/></testcase>';
         }
         else {
           // Default failure message for new metric types that will be included in the future.
