@@ -32,20 +32,44 @@ function generateJUnitXML(data, options) {
         );
       } else {
         failures++;
-        var failureMessage = ""
-        if (metric.type == "counter") {
-          failureMessage = '"><failure message="failed, count: ' + metric.values.count + '"/></testcase>';
-        }
-        else if (metric.type == "gauge"){
-          failureMessage = '"><failure message="failed, value: ' + metric.values.value + '"/></testcase>';
-        }
-        else if (metric.type == "rate") {
-          failureMessage = '"><failure message="failed, number of fails: ' + metric.values.fails + '"/></testcase>';
-        }
-        else if (metric.type == "trend") {
-          failureMessage = '"><failure message="failed, mean value: ' + metric.values.med + '"/></testcase>';
-        }
-        else {
+        var failureMessage = '';
+        if (metric.type == 'counter') {
+          failureMessage =
+            '"><failure message="failed, count: ' +
+            metric.values.count +
+            ', rate: ' +
+            metric.values.rate +
+            '"/></testcase>';
+        } else if (metric.type == 'gauge') {
+          failureMessage =
+            '"><failure message="failed, value: ' +
+            metric.values.value +
+            ', min: ' +
+            metric.values.min +
+            ', max: ' +
+            metric.values.max +
+            '"/></testcase>';
+        } else if (metric.type == 'rate') {
+          failureMessage =
+            '"><failure message="failed, number of fails: ' +
+            metric.values.fails +
+            ', number of passes: ' +
+            metric.values.passes +
+            ', rate: ' +
+            metric.values.rate +
+            '"/></testcase>';
+        } else if (metric.type == 'trend') {
+          failureMessage =
+            '"><failure message="failed, average value: ' +
+            metric.values.avg +
+            ', min value: ' +
+            metric.values.min +
+            ', mean value: ' +
+            metric.values.med +
+            ', max value: ' +
+            metric.values.max +
+            '"/></testcase>';
+        } else {
           // Default failure message for new metric types that will be included in the future.
           failureMessage = '"><failure message="failed" /></testcase>';
         }
@@ -53,7 +77,8 @@ function generateJUnitXML(data, options) {
           '<testcase name="' +
             escapeHTML(metricName) +
             ' - ' +
-            escapeHTML(thresholdName) + failureMessage
+            escapeHTML(thresholdName) +
+            failureMessage,
         );
       }
     });
