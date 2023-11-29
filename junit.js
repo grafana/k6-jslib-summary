@@ -14,7 +14,9 @@ function generateJUnitXML(data, options) {
   const name =
     options && options.name ? escapeHTML(options.name) : 'k6 thresholds';
   const classname =
-    options && options.classname ? escapeHTML(options.classname) : '';
+    options && options.classname
+      ? escapeHTML(options.classname)
+      : 'Unnamed folder';
   let failures = 0;
   let cases = [];
 
