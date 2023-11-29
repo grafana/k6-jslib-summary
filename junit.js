@@ -11,6 +11,12 @@ function escapeHTML(str) {
 }
 
 function generateJUnitXML(data, options) {
+  const name =
+    options && options.name ? escapeHTML(options.name) : 'k6 thresholds';
+  const classname =
+    options && options.classname
+      ? escapeHTML(options.classname)
+      : 'Unnamed folder';
   let failures = 0;
   let cases = [];
 
@@ -19,32 +25,30 @@ function generateJUnitXML(data, options) {
       return;
     }
     Object.entries(metric.thresholds).forEach(([thresholdName, threshold]) => {
+      const testcaseName = `${escapeHTML(metricName)} - ${escapeHTML(
+        thresholdName,
+      )}`;
+
       if (threshold.ok) {
         cases.push(
-          `<testcase name="${escapeHTML(metricName)} - ${escapeHTML(
-            thresholdName,
-          )}" />`,
+          `<testcase name="${testcaseName}" classname="${classname}" />`,
         );
       } else {
         failures++;
         const failureMessage =
-          `"><failure message="${metric.type} threshold failed: ` +
+          `${metric.type} threshold failed: ` +
           Object.entries(metric.values)
             .map(([key, value]) => `${key} value: ${value}`)
-            .join(', ') +
-          '"/></testcase>';
+            .join(', ');
 
         cases.push(
-          `<testcase name="${escapeHTML(metricName)} - ${escapeHTML(
-            thresholdName,
-          )}${failureMessage}"`,
+          `<testcase name="${testcaseName}" classname="${classname}"><failure message="${escapeHTML(
+            failureMessage,
+          )}" /></testcase>`,
         );
       }
     });
   });
-
-  const name =
-    options && options.name ? escapeHTML(options.name) : 'k6 thresholds';
 
   return `<?xml version="1.0"?>
     <testsuites tests="${cases.length}" failures="${failures}">
