@@ -1,0 +1,24 @@
+{
+    "name": "k6-jslib-summary",
+    "repository": "https://github.com/grafana/k6-jslib-summary",
+    "version": "0.0.5",
+    "description": "Creates a summary of the k6 JS libraries used in a test runs.",
+    "devDependencies": {
+        "esbuild": "^0.14.51",
+        "eslint": "^8.20.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "prettier": "^2.7.1"
+    },
+    "engines": {},
+    "scripts": {
+        "lint": "eslint src",
+        "fix": "eslint --fix src",
+        "build": "esbuild ./src/index.js --bundle --sourcemap --minify --format=cjs --legal-comments=none --outfile=./build/index.js"
+    },
+    "keywords": [
+        "k6"
+    ],
+    "author": "grafana/k6 team",
+    "license": "Apache-2.0"
+}
