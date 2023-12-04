@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - name: Dependencies
+        run: yarn
+      - name: Check build & archive build
+        run: yarn build && tar -zcf build.tar.gz build
+      - name: Create Release & Upload Asset
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -x
+          VERSION="${GITHUB_REF##*/}"
+          gh release create "$VERSION" build.tar.gz --target "$GITHUB_SHA" --title "Release $VERSION"
