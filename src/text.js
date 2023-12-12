@@ -1,6 +1,6 @@
 var forEach = function (obj, callback) {
   for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       if (callback(key, obj[key])) {
         break;
       }
@@ -115,13 +115,13 @@ function summarizeGroup(indent, group, decorate) {
     indent = indent + '  ';
   }
 
-  for (var i = 0; i < group.checks.length; i++) {
+  for (let i = 0; i < group.checks.length; i++) {
     result.push(summarizeCheck(indent, group.checks[i], decorate));
   }
   if (group.checks.length > 0) {
     result.push('');
   }
-  for (var i = 0; i < group.groups.length; i++) {
+  for (let i = 0; i < group.groups.length; i++) {
     Array.prototype.push.apply(
       result,
       summarizeGroup(indent, group.groups[i], decorate),
@@ -211,7 +211,10 @@ function humanizeGenericDuration(dur) {
 }
 
 function humanizeDuration(dur, timeUnit) {
-  if (timeUnit !== '' && unitMap.hasOwnProperty(timeUnit)) {
+  if (
+    timeUnit !== '' &&
+    Object.prototype.hasOwnProperty.call(unitMap, timeUnit)
+  ) {
     return (dur * unitMap[timeUnit].coef).toFixed(2) + unitMap[timeUnit].unit;
   }
 
@@ -284,7 +287,7 @@ function summarizeMetrics(options, data, decorate) {
 
     if (metric.type == 'trend') {
       var cols = [];
-      for (var i = 0; i < numTrendColumns; i++) {
+      for (let i = 0; i < numTrendColumns; i++) {
         var tc = options.summaryTrendStats[i];
         var value = metric.values[tc];
         if (tc === 'count') {
@@ -308,7 +311,7 @@ function summarizeMetrics(options, data, decorate) {
       nonTrendValueMaxLen = valueLen;
     }
     nonTrendExtras[name] = values.slice(1);
-    for (var i = 1; i < values.length; i++) {
+    for (let i = 1; i < values.length; i++) {
       var extraLen = strWidth(values[i]);
       if (extraLen > nonTrendExtraMaxLens[i - 1]) {
         nonTrendExtraMaxLens[i - 1] = extraLen;
@@ -330,10 +333,10 @@ function summarizeMetrics(options, data, decorate) {
   });
 
   var getData = function (name) {
-    if (trendCols.hasOwnProperty(name)) {
+    if (Object.prototype.hasOwnProperty.call(trendCols, name)) {
       var cols = trendCols[name];
       var tmpCols = new Array(numTrendColumns);
-      for (var i = 0; i < cols.length; i++) {
+      for (let i = 0; i < cols.length; i++) {
         tmpCols[i] =
           options.summaryTrendStats[i] +
           '=' +
@@ -354,7 +357,7 @@ function summarizeMetrics(options, data, decorate) {
         fmtData + ' ' + decorate(extras[0], palette.cyan, palette.faint);
     } else if (extras.length > 1) {
       var parts = new Array(extras.length);
-      for (var i = 0; i < extras.length; i++) {
+      for (let i = 0; i < extras.length; i++) {
         parts[i] =
           decorate(extras[i], palette.cyan, palette.faint) +
           ' '.repeat(nonTrendExtraMaxLens[i] - strWidth(extras[i]));
