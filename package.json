@@ -12,7 +12,7 @@
     },
     "engines": {},
     "scripts": {
-        "lint": "eslint src",
+        "lint": "eslint --max-warnings 0 src",
         "fix": "eslint --fix src",
         "build": "esbuild ./src/index.js --bundle --sourcemap --minify --format=cjs --legal-comments=none --outfile=./build/index.js"
     },
