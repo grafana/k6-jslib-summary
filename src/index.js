@@ -4,3 +4,4 @@
 // (see package.json's "build" script)
 export { jUnit } from './junit.js';
 export { humanizeValue, textSummary } from './text.js';
+export { htmlSummary } from './html.js';
