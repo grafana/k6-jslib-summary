@@ -22,7 +22,7 @@ jobs:
       - name: Check build & archive build
         run: yarn build && tar -zcf build.tar.gz build
       - name: Created build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build
           if-no-files-found: error
