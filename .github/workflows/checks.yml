@@ -9,8 +9,12 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -27,4 +31,4 @@ jobs:
           name: build
           if-no-files-found: error
           path: build.tar.gz
-          retention-days: 1  
+          retention-days: 1
