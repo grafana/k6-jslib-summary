@@ -6,7 +6,6 @@ metadata:
   description: |
     This repository contains source code of the functions that can be used to generate different end-of-test summary reports when used in the handleSummary()
   annotations:
-    backstage.io/techdocs-ref: dir:.
     github.com/project-slug: grafana/k6-jslib-summary
 spec:
   type: library
