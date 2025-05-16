@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: k6-jslib-summary
+  title: k6-jslib-summary
+  description: |
+    This repository contains source code of the functions that can be used to generate different end-of-test summary reports when used in the handleSummary()
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: grafana/k6-jslib-summary
+spec:
+  type: library
+  owner: group:default/k6-core
+  lifecycle: production
