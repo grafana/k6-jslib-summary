@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
+          package-manager-cache: false
       - name: Dependencies
         run: yarn
       - name: Lint Code
