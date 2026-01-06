@@ -4,7 +4,7 @@
     "version": "0.0.5",
     "description": "Creates a summary of the k6 JS libraries used in a test runs.",
     "devDependencies": {
-        "esbuild": "0.27.1",
+        "esbuild": "0.27.2",
         "eslint": "8.57.1",
         "eslint-config-prettier": "8.10.0",
         "eslint-plugin-prettier": "4.2.1",
