@@ -1,13 +1,13 @@
-name: Lint, Check Build
+name: Test
 
 on:
   push:
-    branches: [main]    
+    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
-  checks:
+  test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,21 +15,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
-      - name: Use Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: '18.x'
-          package-manager-cache: false
-      - name: Dependencies
-        run: yarn
-      - name: Lint Code
-        run: yarn lint
-      - name: Check build & archive build
-        run: yarn build && tar -zcf build.tar.gz build
-      - name: Created build artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: build
-          if-no-files-found: error
-          path: build.tar.gz
-          retention-days: 1
+      - name: Install k6
+        uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde4 # v1
+      - name: Run tests
+        run: k6 run test/smoke.test.js
