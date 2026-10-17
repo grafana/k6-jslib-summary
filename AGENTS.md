@@ -18,3 +18,4 @@ Options merge three layers: hardcoded defaults < k6 data.options < caller-suppli
 - The text formatter treats metric type solely by checking `metric.type == 'trend'` vs everything else. If k6 introduces a new metric type, it falls through to a `[no data]` display with no warning.
 - `humanizeValue` is exported standalone because k6 Cloud and other tools reuse it outside `handleSummary`. Changing its signature or output format is a cross-repo breaking change.
 - JUnit output only covers thresholds. Checks and non-threshold metrics are invisible in JUnit. If a test has no thresholds, JUnit output will be an empty testsuite.
+- Security issues should be reported via [Grafana's security issue reporting page](https://grafana.com/legal/report-a-security-issue/) and not directly in this repository.
